@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/3.7/phpunit.xsd"
+         bootstrap="vendor/bin/phpunit"
+         colors="true"
+         verbose="true">
+    <testsuites>
+        <testsuite name="app">
+            <directory>./tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">./src</directory>
+        </whitelist>
+    </filter>
+
+    <logging>
+        <log type="coverage-html" target="log/__report/coverage" lowUpperBound="40" highLowerBound="70" />
+        <log type="coverage-clover" target="build/logs/clover.xml"/>
+        <log type="junit" target="tests/results.xml"/>
+    </logging>
+
+    <php>
+        <env name="DB_DRIVER" value="mysql" />
+        <env name="DB_NAME" value="restaurant" />
+        <env name="DB_HOST" value="localhost" />
+        <env name="DB_USER" value="app_user" />
+        <env name="DB_PASSWORD" value="abc123" />
+    </php>
+</phpunit>

@@ -1,0 +1,66 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "org.ajoberstar.grgit:grgit-gradle:3.0.0-rc.3"
+    }
+    dependencies {
+        classpath 'mysql:mysql-connector-java:6.0.6'
+    }
+}
+
+plugins {
+    id "org.flywaydb.flyway" version "5.0.7"
+    id "org.ajoberstar.grgit" version "3.0.0-rc.3"
+}
+
+def version = new File("VERSION").text
+//def ghash = grgit.head().id
+def date() {
+    return new Date().format('yyyyMMdd HHmmssZ')
+}
+
+task build {
+    doLast {
+        exec {
+            commandLine 'docker', 'build',
+                    '--build-arg', "VERSION=${version}",
+                    //'--build-arg', "GHASH=${ghash}",
+                    '--build-arg', "BUILD_TIME=date()",
+                    '-t', "restaurant-api:${version}", "${System.getProperty("user.dir")}"
+        }
+        exec {
+            commandLine 'docker', 'tag', "restaurant-api:${version}", "restaurant-api:latest"
+        }
+    }
+}
+
+task run {
+    dependsOn = ["build"]
+    doLast {
+        exec {
+            commandLine 'docker-compose', 'up', "-d"
+        }
+    }
+}
+
+task stop {
+    doLast {
+        exec {
+            commandLine 'docker-compose', 'down'
+        }
+    }
+}
+
+flyway {
+    url = dbHost
+    schemas = ['restaurant']
+    table = "schema_history"
+    user = dbUserName
+    password = dbPassword
+    locations = ['filesystem:db']
+}

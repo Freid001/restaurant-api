@@ -1,0 +1,33 @@
+version: "3"
+services:
+  restaurant-api:
+    image: restaurant-api:latest
+    command: start
+    ports:
+      - 8000:8000
+    links:
+      - db
+    environment:
+      DB_DATABASE: restaurant
+      DB_HOST: db
+      DB_USER: app_user
+      DB_PASSWORD: abc123
+
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: restaurant
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: abc123
+      MYSQL_ROOT_PASSWORD: abc123
+    ports:
+      - 3306:3306
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      MYSQL_ROOT_PASSWORD: abc123
+    ports:
+      - 8080:80
+    links:
+      - db
