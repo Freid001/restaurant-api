@@ -96,12 +96,12 @@ class TransactionRepository
      */
     public function create(int $customerId, int $orderedId, bool $tip, float $paid) : int
     {
-        $query = 'INSERT INTO `transaction` (`id`, `customer_id`, `ordered_id`, `tip`, `paid`) VALUES (NULL, :customer_id, :orderedId, :tip, :paid)';
+        $query = 'INSERT INTO `transaction` (`id`, `customer_id`, `ordered_id`, `tip`, `paid`) VALUES (NULL, :customer_id, :ordered_id, :tip, :paid)';
         $query = $this->conn->prepare($query);
         $query->execute([
             ':customer_id'  => $customerId,
             ':ordered_id'   => $orderedId,
-            ':tip'          => false,
+            ':tip'          => 0,
             ':paid'         => $paid
         ]);
 

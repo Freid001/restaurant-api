@@ -77,19 +77,14 @@ class BillRoute
         }
 
         $this->billRepository->getTransactionRepository()->create(
-//            $body->customerId,
-//            $body->orderedId,
-//            0,
-//            $body->pay
-
-            3,
-            6,
-            1,
-            3.00
+            $body->customerId,
+            $body->orderedId,
+            false,
+            $body->pay
         );
 
         return new Response(200,
-            array_map(function (Bill $bill) {
+            array_map(function (Bill $bill) use ($body) {
                 return [
                     'id' => $bill->getOrder()->getId(),
                     'state' => $bill->getState(),
@@ -99,8 +94,8 @@ class BillRoute
                     'totalOriginalPrice' => $bill->getTotalOriginalPrice(),
                     'totalDiscount' => $bill->getTotalDiscount(),
                     'totalSavings' => $bill->getTotalSavings(),
-                    'totalCharged' => $bill->getTotalCharged(),
-                    'totalDue' => $bill->getTotalDue(),
+                    'totalCharged' => $bill->getTotalCharged([$body->orderedId]),
+                    'totalDue' => $bill->getTotalDue([$body->orderedId]),
                     'totalTip' => $bill->getTotalTip(),
                     'totalPaid' => $bill->getTotalPaid()
                 ];

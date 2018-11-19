@@ -1,4 +1,5 @@
 log/
 vendor/
+build/
 .idea/
 .gradle
