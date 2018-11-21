@@ -132,7 +132,7 @@ class BillTest extends TestCase
 
         $bill = new Bill($order,$transactions);
 
-        $this->assertEquals(0.42, $bill->getTotalDiscount());
+        $this->assertEquals(0.42, round($bill->getTotalDiscount(),2));
     }
 
     public function testGetTotalOriginalPrice()
@@ -213,27 +213,7 @@ class BillTest extends TestCase
 
         $this->assertEquals("open", $bill->getState());
     }
-
-    public function testGetPartPaidState()
-    {
-        $customer = new Customer(1, 'john', 'smith');
-
-        $orderedItems = [
-            new OrderedItem(1, new MenuItem(1, 'pizza', 1.00, true), 1.00, 0.00),
-            new OrderedItem(2, new MenuItem(2, 'burger', 2.00, true), 2.00, 0.00)
-        ];
-
-        $order  = new Order(1, $customer, $orderedItems);
-
-        $transactions = [
-            new Transaction(1, $customer, $order, false, 1.00)
-        ];
-
-        $bill = new Bill($order,$transactions);
-
-        $this->assertEquals("partially-paid", $bill->getState());
-    }
-
+    
     public function testGetClosedState()
     {
         $customer = new Customer(1, 'john', 'smith');

@@ -58,7 +58,7 @@ class RestaurantRepository
             )
         );
 
-        return isset($result[$restaurantId]) ? $result[$restaurantId] : null;
+        return isset($result[0]) ? $result[0] : null;
     }
 
     /**
@@ -182,7 +182,7 @@ class RestaurantRepository
     }
 
     /**
-     * @param Restaurant[] $restaurants
+     * @param array|null $restaurants
      * @param $row
      * @return array
      */
@@ -190,13 +190,14 @@ class RestaurantRepository
     {
         if(!$this->helper->arrayKeysExists([
             'restaurant_id',
+            'restaurant',
             'id',
             'item',
             'price',
             'available'
-        ], $row ? $row : [])
+        ], is_array($row) ? $row : [])
         ){
-            return null;
+            return [];
         }
 
         if (!isset($restaurants[$row['restaurant_id']])) {

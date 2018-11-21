@@ -48,6 +48,7 @@ class RestaurantRoute
     /**
      * @param \stdClass $body
      * @return Response
+     * @throws \Exception
      */
     public function createRestaurant(\stdClass $body): Response
     {
@@ -59,15 +60,20 @@ class RestaurantRoute
 
         $restaurantId = $this->restaurantRepository->createRestaurant($body->restaurant, $body->cuisine);
 
-        $this->restaurantRepository->createdMenu($restaurantId, $body->items);
+        $this->restaurantRepository->createdMenu($restaurantId, $body->menu);
 
         $restaurant = $this->restaurantRepository->fetch($restaurantId);
 
-        return new Response(201, [
-            "id" => $restaurant->getId(),
-            "restaurant" => $restaurant->getName(),
-            "menu" => $this->formatMenuItems($restaurant->getMenuItems())
-        ]);
+        $response = [];
+        if ($restaurant instanceof Restaurant) {
+            $response = [
+                "id" => $restaurant->getId(),
+                "restaurant" => $restaurant->getName(),
+                "menu" => $this->formatMenuItems($restaurant->getMenuItems())
+            ];
+        }
+
+        return new Response(201, $response);
     }
 
     /**
@@ -88,18 +94,18 @@ class RestaurantRoute
             $errors['cuisine'][] = "Must be between 2 than 255 characters.";
         }
 
-        return array_reduce($body->items, function($errors, \stdClass $item) use ($ignore){
-            if (!(strlen($item->item) >= 2 && strlen($item->item) <= 255) &&
-                !in_array("item", $ignore)) {
-                $errors['items']['item'][] = "Must be between 2 than 255 characters.";
+        return array_reduce($body->menu, function($errors, \stdClass $menu) use ($ignore){
+            if (!(strlen($menu->item) >= 2 && strlen($menu->item) <= 255) &&
+                !in_array("menu", $ignore)) {
+                $errors['menu']['item'][] = "Must be between 2 than 255 characters.";
             }
 
-            if (!is_float($item->price) && !in_array("price", $ignore)) {
-                $errors['items']['price'][] = "Must be float.";
+            if (!is_float($menu->price) && !in_array("price", $ignore)) {
+                $errors['menu']['price'][] = "Must be float.";
             }
 
-            if (!is_bool($item->available) && !in_array("available", $ignore)) {
-                $errors['items']['available'][] = "Must be boolean.";
+            if (!is_bool($menu->available) && !in_array("available", $ignore)) {
+                $errors['menu']['available'][] = "Must be boolean.";
             }
 
             return $errors;
@@ -112,20 +118,12 @@ class RestaurantRoute
      */
     private function formatMenuItems(array $menuItems): array
     {
-        return array_map(function (Restaurant $restaurant) {
-            $menu = array_map(function (MenuItem $menu) {
-                return [
-                    "id" => $menu->getId(),
-                    "item" => $menu->getItem(),
-                    "price" => $menu->getPrice(),
-                    "available" => $menu->isAvailable()
-                ];
-            }, $restaurant->getMenuItems());
-
+        return array_map(function (MenuItem $menu) {
             return [
-                "id" => $restaurant->getId(),
-                "restaurant" => $restaurant->getName(),
-                "menu" => $menu
+                "id" => $menu->getId(),
+                "item" => $menu->getItem(),
+                "price" => $menu->getPrice(),
+                "available" => $menu->isAvailable()
             ];
         }, $menuItems);
     }

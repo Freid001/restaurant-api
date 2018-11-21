@@ -176,9 +176,9 @@ class OrderRepository
             'available',
             'price_charged',
             'discount'
-        ], $row ? $row : [])
+        ], is_array($row) ? $row : [])
         ) {
-            return null;
+            return [];
         }
 
         if (!isset($orders[$row['order_id']])) {

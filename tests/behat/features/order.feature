@@ -34,7 +34,7 @@ Feature: Order
     {
       "restaurant": "dominos",
       "cuisine": "pizza",
-      "items": [
+      "menu": [
         {
           "item": "margherita pizza",
           "price": 5.99,
@@ -54,68 +54,27 @@ Feature: Order
     Then the response body contains JSON:
     """
     {
-        "meta": {
-            "status": "@variableType(string)"
-        },
-        "data": {
+      "meta": {
+          "status": "@variableType(string)"
+      },
+      "data": {
+        "id": "@variableType(integer)",
+        "restaurant": "@variableType(string)",
+        "menu": [
+          {
             "id": "@variableType(integer)",
-            "firstName": "@variableType(string)",
-            "lastName": "@variableType(string)"
-        }
-    }
-    """
-
-  Scenario: append available menu item
-    Given the request body is:
-    """
-    {
-      "restaurantId": 1,
-      "item": "margherita pizza",
-      "price": 5.99",
-      "available": true"
-    }
-    """
-    And the "Content-Type" request header is "application/json"
-    When I request "/restaurant/item" using HTTP POST
-    Then the response code is 200
-    Then the response body contains JSON:
-    """
-    {
-        "meta": {
-            "status": "@variableType(string)"
-        },
-        "data": {
+            "item": "@variableType(string)",
+            "price": "@variableType(float)",
+            "available": "@variableType(boolean)"
+          },
+          {
             "id": "@variableType(integer)",
-            "firstName": "@variableType(string)",
-            "lastName": "@variableType(string)"
-        }
-    }
-    """
-
-  Scenario: append unavailable menu item
-    Given the request body is:
-    """
-    {
-      "restaurantId": 1,
-      "item": "pepperoni pizza",
-      "price": 9.99",
-      "available": false"
-    }
-    """
-    And the "Content-Type" request header is "application/json"
-    When I request "/restaurant/item" using HTTP POST
-    Then the response code is 200
-    Then the response body contains JSON:
-    """
-    {
-        "meta": {
-            "status": "@variableType(string)"
-        },
-        "data": {
-            "id": "@variableType(integer)",
-            "firstName": "@variableType(string)",
-            "lastName": "@variableType(string)"
-        }
+            "item": "@variableType(string)",
+            "price": "@variableType(float)",
+            "available": "@variableType(boolean)"
+          }
+        ]
+      }
     }
     """
 
@@ -161,7 +120,7 @@ Feature: Order
     """
     {
       "orderId":1,
-      "itemId": 2,
+      "itemId": 1,
       "discount": 0.0
     }
     """
@@ -224,7 +183,7 @@ Feature: Order
     """
     {
       "customerId":1,
-      "itemId": 1,
+      "itemId": 2,
       "discount": 0.0
     }
     """

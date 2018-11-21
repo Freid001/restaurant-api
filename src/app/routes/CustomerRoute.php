@@ -32,11 +32,11 @@ class CustomerRoute
      */
     public function customers(?string $firstName, ?string $lastName): Response
     {
-        $customers = array_map(function(Customer $customer){
+        $customers = array_map(function (Customer $customer) {
             return [
-                "id"        => $customer->getId(),
+                "id" => $customer->getId(),
                 "firstName" => $customer->getFirstName(),
-                "lastName"  => $customer->getLastName()
+                "lastName" => $customer->getLastName()
             ];
         }, $this->customerRepository->fetchAll($firstName, $lastName));
 
@@ -46,6 +46,7 @@ class CustomerRoute
     /**
      * @param \stdClass $body
      * @return Response
+     * @throws \Exception
      */
     public function createCustomer(\stdClass $body): Response
     {
@@ -58,11 +59,16 @@ class CustomerRoute
         $customerId = $this->customerRepository->create($body->firstName, $body->lastName);
         $customer = $this->customerRepository->fetch($customerId);
 
-        return new Response(201, [
-            "id"        => $customer->getId(),
-            "firstName" => $customer->getFirstName(),
-            "lastName"  => $customer->getLastName()
-        ]);
+        $response = [];
+        if ($customer instanceof Customer) {
+            $response = [
+                "id" => $customer->getId(),
+                "firstName" => $customer->getFirstName(),
+                "lastName" => $customer->getLastName()
+            ];
+        }
+
+        return new Response(201, $response);
     }
 
     /**
