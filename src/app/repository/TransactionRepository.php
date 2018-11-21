@@ -101,7 +101,7 @@ class TransactionRepository
         $query->execute([
             ':customer_id'  => $customerId,
             ':ordered_id'   => $orderedId,
-            ':tip'          => 0,
+            ':tip'          => $tip,
             ':paid'         => $paid
         ]);
 

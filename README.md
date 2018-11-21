@@ -7,6 +7,7 @@
 * [Docker](https://www.docker.com/)
 * [Gradle](https://gradle.org/)
 * [PHPUnit](https://phpunit.de/getting-started/phpunit-7.html)
+* [Behat](http://behat.org/en/latest/)
 
 ### Installation
 ```bash
@@ -18,6 +19,12 @@ gradle stop
 
 // migrate database
 gradle flywayMigrate -i 
+
+// run unit tests
+gradle unitTest
+
+// run component tests
+gradle componentTest
 ```
 
 ## Usage

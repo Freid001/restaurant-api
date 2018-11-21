@@ -35,6 +35,33 @@ class RestaurantRepository
     }
 
     /**
+     * @param int|null $restaurantId
+     * @return Restaurant|null
+     */
+    public function fetch(?int $restaurantId): ?Restaurant
+    {
+        $query = 'SELECT m.*, 
+                         r.restaurant 
+                  FROM menu AS m 
+                  LEFT JOIN restaurant AS r ON m.restaurant_id=r.id
+                  WHERE r.id=:id';
+        $parameters = [':id' => $restaurantId];
+
+        $query = $this->conn->prepare($query);
+        $query->execute($parameters);
+
+        $result = $this->helper->arrayRemoveAssocKeys(
+            array_reduce(
+                $query->fetchAll(\PDO::FETCH_ASSOC),
+                [$this, 'hydrateRestaurant'],
+                []
+            )
+        );
+
+        return isset($result[$restaurantId]) ? $result[$restaurantId] : null;
+    }
+
+    /**
      * @param string|null $restaurant
      * @param string|null $item
      * @param bool|null $available
@@ -109,6 +136,49 @@ class RestaurantRepository
             $result['price'],
             $result['available']
         );
+    }
+
+    /**
+     * @param string $restaurant
+     * @param string $cuisine
+     * @return string
+     */
+    public function createRestaurant(string $restaurant, string $cuisine) : int
+    {
+        $query = 'INSERT INTO `restaurant` (`id`, `restaurant`, `cuisine`) VALUES (NULL, :restaurant, :cuisine)';
+        $query = $this->conn->prepare($query);
+        $query->execute([
+            ':restaurant'   => $restaurant,
+            ':cuisine'      => $cuisine,
+        ]);
+
+        return $this->conn->lastInsertId();
+    }
+
+    /**
+     * @param int $restaurantId
+     * @param array $items
+     * @return int
+     */
+    public function createdMenu(int $restaurantId, array $items): int
+    {
+        $values = [];
+        $parameters = [];
+        foreach ($items as $item) {
+            if($item instanceof \stdClass) {
+                $values[] = '(NULL, ?, ?, ?, ?)';
+                $parameters[] = $restaurantId;
+                $parameters[] = $item->item;
+                $parameters[] = $item->price;
+                $parameters[] = $item->available ? 1 : 0;
+            }
+        }
+
+        $query = 'INSERT INTO `menu` (`id`, `restaurant_id`, `item`, `price`, `available`) VALUES ' . implode(', ', $values) . ';';
+        $query = $this->conn->prepare($query);
+        $query->execute($parameters);
+
+        return $restaurantId;
     }
 
     /**

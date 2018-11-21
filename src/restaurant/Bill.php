@@ -30,27 +30,32 @@ class Bill
     }
 
     /**
-     * @return Order
-     */
-    public function getOrder(): Order
-    {
-        return $this->order;
-    }
-
-    /**
-     * @param Order $order
-     */
-    public function setOrder(Order $order): void
-    {
-        $this->order = $order;
-    }
-
-    /**
      * @return array
      */
-    public function getTransactions(): array
+    public function getTransactionOrderedItemIds(): array
     {
-        return $this->transactions;
+        return array_reduce($this->getTransactions(), function ($ids, Transaction $transaction) {
+            $orderIds = array_map(function (OrderedItem $orderedItem) {
+                return $orderedItem->getId();
+            }, $transaction->getOrder()->getOrderedItems());
+
+            return array_merge($ids, $orderIds);
+        }, []);
+    }
+
+    /**
+     * @param bool $excludeTip
+     * @return array
+     */
+    public function getTransactions(bool $excludeTip = false): array
+    {
+        return array_filter($this->transactions, function (Transaction $transaction) use ($excludeTip) {
+            if (!$excludeTip || !$transaction->isTip()) {
+                return true;
+            }
+
+            return false;
+        });
     }
 
     /**
@@ -65,29 +70,36 @@ class Bill
      * @param array $orderedIds
      * @return float
      */
-    public function getTotalPaid(array $orderedIds = []): float
+    public function getTotalDiscount(array $orderedIds = []): float
     {
-        return array_reduce($this->getTransactions(), function ($total, Transaction $transaction) use ($orderedIds) {
-            if(empty($orderedIds) ||
-                $transaction->getOrder()->getOrderedItems($orderedIds)){
-                return $total + $transaction->getPaid();
-            }
-            return $total;
+        return (($this->getTotalOriginalPrice($orderedIds) - $this->getTotalCharged($orderedIds)) / $this->getTotalOriginalPrice($orderedIds));
+    }
+
+    /**
+     * @param array $orderedIds
+     * @return float
+     */
+    public function getTotalOriginalPrice(array $orderedIds = []): float
+    {
+        return array_reduce($this->getOrder()->getOrderedItems($orderedIds), function ($total, OrderedItem $orderedItem) {
+            return $total + $orderedItem->getItem()->getPrice();
         }, 0);
     }
 
     /**
-     * @return array
+     * @return Order
      */
-    public function getTransactionOrderedItemIds(): array
+    public function getOrder(): Order
     {
-        return array_reduce($this->getTransactions(), function ($ids, Transaction $transaction) {
-            $orderIds = array_map(function (OrderedItem $orderedItem) {
-                return $orderedItem->getId();
-            }, $transaction->getOrder()->getOrderedItems());
+        return $this->order;
+    }
 
-            return array_merge($ids, $orderIds);
-        }, []);
+    /**
+     * @param Order $order
+     */
+    public function setOrder(Order $order): void
+    {
+        $this->order = $order;
     }
 
     /**
@@ -105,37 +117,11 @@ class Bill
      * @param array $orderedIds
      * @return float
      */
-    public function getTotalDue(array $orderedIds = []) : float
+    public function getTotalSavings(array $orderedIds = []): float
     {
-        return $this->getTotalCharged($orderedIds) - $this->getTotalPaid($orderedIds);
-    }
-
-    /**
-     * @return float
-     */
-    public function getTotalDiscount(): float
-    {
-        return round((($this->getTotalOriginalPrice() - $this->getTotalCharged()) / $this->getTotalOriginalPrice()), 2);
-    }
-
-    /**
-     * @return float
-     */
-    public function getTotalOriginalPrice(): float
-    {
-        return array_reduce($this->getOrder()->getOrderedItems($this->getTransactionOrderedItemIds()), function ($total, OrderedItem $orderedItem) {
-            return $total + $orderedItem->getItem()->getPrice();
-        }, 0);
-    }
-
-    /**
-     * @return float
-     */
-    public function getTotalSavings(): float
-    {
-        return array_reduce($this->getOrder()->getOrderedItems($this->getTransactionOrderedItemIds()), function ($total, OrderedItem $orderedItem) {
+        return array_reduce($this->getOrder()->getOrderedItems($orderedIds), function ($total, OrderedItem $orderedItem) {
             return $total + ($orderedItem->getDiscount() * $orderedItem->getItem()->getPrice());
-            }, 0);
+        }, 0);
     }
 
     /**
@@ -152,16 +138,41 @@ class Bill
     }
 
     /**
+     * @param array $orderedIds
      * @return string
      */
-    public function getState(): string
+    public function getState(array $orderedIds = []): string
     {
-        if ($this->getTotalDue() <= 0) {
+        if ($this->getTotalDue($orderedIds) <= 0) {
             return "closed";
-        } else if ($this->getTotalDue() != $this->getTotalCharged()) {
-            return "partially-paid";
         }
 
         return "open";
+    }
+
+    /**
+     * @param array $orderedIds
+     * @return float
+     */
+    public function getTotalDue(array $orderedIds = []): float
+    {
+        return $this->getTotalCharged($orderedIds) - $this->getTotalPaid($orderedIds, true);
+    }
+
+    /**
+     * @param array $orderedIds
+     * @param bool $excludeTip
+     * @return float
+     */
+    public function getTotalPaid(array $orderedIds = [], bool $excludeTip = false): float
+    {
+        return array_reduce($this->getTransactions($excludeTip), function ($total, Transaction $transaction) use ($orderedIds) {
+            if (empty($orderedIds) ||
+                $transaction->getOrder()->getOrderedItems($orderedIds)) {
+
+                return $total + $transaction->getPaid();
+            }
+            return $total;
+        }, 0);
     }
 }

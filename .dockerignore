@@ -1,2 +1,5 @@
+db/
+tests/
+
 Dockerfile
 composer.lock

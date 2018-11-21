@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace test\Restaurant;
+namespace Test\phpunit\Restaurant;
 
 
 use PHPUnit\Framework\TestCase;

@@ -9,11 +9,21 @@ namespace App;
 class Response
 {
     /**
-     * Response constructor.
-     * @param $code
-     * @param $body
+     * @var
      */
-    public function __construct($code, $body)
+    private $code;
+
+    /**
+     * @var array
+     */
+    private $body;
+
+    /**
+     * Response constructor.
+     * @param int $code
+     * @param array $body
+     */
+    public function __construct(int $code, array $body = [])
     {
         $this->code = $code;
         $this->body = $body;
@@ -28,10 +38,47 @@ class Response
     }
 
     /**
+     * @return array
+     */
+    public function getMeta(): array
+    {
+        switch($this->code) {
+            case 200:
+                $meta = ["status" => "ok"];
+                break;
+
+            case 201:
+                $meta = ["status" => "created"];
+                break;
+
+            case 400:
+                $meta = ["status" => "bad request"];
+                break;
+
+            case 404:
+                $meta = ["status" => "not found"];
+                break;
+
+            case 500:
+                $meta = ["status" => "internal server error"];
+                break;
+
+            case 503:
+                $meta = ["status" => "unavailable"];
+                break;
+
+            default:
+                $meta = [];
+        }
+
+        return $meta;
+    }
+
+    /**
      * @return string
      */
     public function getJsonBody(): string
     {
-        return json_encode($this->body);
+        return json_encode(['meta'=>$this->getMeta(), 'data'=>$this->body]);
     }
 }

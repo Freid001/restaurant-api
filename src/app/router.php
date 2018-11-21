@@ -2,6 +2,8 @@
 
 namespace App;
 
+use Restaurant\Restaurant;
+
 /**
  * Class Routes
  * @package App
@@ -34,6 +36,11 @@ class Router
     private $helper;
 
     /**
+     * @var bool
+     */
+    private $dbStatus = false;
+
+    /**
      * Router constructor.
      * @param string $method
      * @param string $uri
@@ -53,9 +60,18 @@ class Router
             }, []);
         }
 
-        $dsn = "mysql:host=" . getenv('DB_HOST') . "; dbname=" . getenv('DB_DATABASE') . ";";
+        $this->conn();
+    }
 
-        $this->pdo = new \pdo($dsn, getenv('DB_USER'), getenv('DB_PASSWORD'));
+    public function conn(): void
+    {
+        try {
+            $dsn = "mysql:host=" . getenv('DB_HOST') . "; dbname=" . getenv('DB_DATABASE') . ";";
+            $this->pdo = new \pdo($dsn, getenv('DB_USER'), getenv('DB_PASSWORD'));
+            $this->dbStatus = true;
+        }catch (\Exception $e) {
+            $this->dbStatus = false;
+        }
     }
 
     /**
@@ -89,12 +105,13 @@ class Router
      */
     public function parseJsonBody()
     {
-        return json_decode(stream_get_contents($this->detectRequestBody()));
-    }
+        $body = json_decode((string) stream_get_contents($this->detectRequestBody()));
 
-    public function health()
-    {
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return new \stdClass();
+        }
 
+        return $body;
     }
 
     /**
@@ -111,6 +128,11 @@ class Router
                         $this->getParameter("firstName"),
                         $this->getParameter("lastName")
                     );
+
+                case "POST /customer":
+                    $customer = new CustomerRoute(new CustomerRepository($this->pdo, $this->helper));
+
+                    return $customer->createCustomer($this->parseJsonBody());
 
                 case "GET /restaurants":
                     $restaurant = new RestaurantRoute(new RestaurantRepository($this->pdo, $this->helper));
@@ -129,6 +151,11 @@ class Router
                         (int)$this->getParameter("item"),
                         $available
                     );
+
+                case "POST /restaurant":
+                    $restaurant = new RestaurantRoute(new RestaurantRepository($this->pdo, $this->helper));
+
+                    return $restaurant->createRestaurant($this->parseJsonBody());
 
                 case "GET /orders":
                     $orders = new OrderRoute(
@@ -188,7 +215,8 @@ class Router
                         new BillRepository(
                             new OrderRepository($this->pdo, $this->helper),
                             new TransactionRepository($this->pdo, $this->helper)
-                        )
+                        ),
+                        new CustomerRepository($this->pdo, $this->helper)
                     );
 
                     return $bill->bills(
@@ -202,7 +230,8 @@ class Router
                         new BillRepository(
                             new OrderRepository($this->pdo, $this->helper),
                             new TransactionRepository($this->pdo, $this->helper)
-                        )
+                        ),
+                        new CustomerRepository($this->pdo, $this->helper)
                     );
 
                     return $bill->pay($this->parseJsonBody());
@@ -212,19 +241,20 @@ class Router
                         new BillRepository(
                             new OrderRepository($this->pdo, $this->helper),
                             new TransactionRepository($this->pdo, $this->helper)
-                        )
+                        ),
+                        new CustomerRepository($this->pdo, $this->helper)
                     );
 
                     return $bill->tip($this->parseJsonBody());
 
-//                case "GET /health":
-//                  break;
+                case "GET /health":
+                    return new Response(200, ["status" => !$this->dbStatus ? "down" : "up"]);
 
                 default:
-                    return new Response(404, ["meta" => ["status" => "not found"]]);
+                    return new Response(404);
             }
         } catch (\Exception $e) {
-            return new Response(503, ["meta" => ["status" => "unavailable"]]);
+            return new Response(503);
         }
     }
 }

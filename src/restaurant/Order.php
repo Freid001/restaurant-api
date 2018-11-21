@@ -38,14 +38,25 @@ class Order
 
     /**
      * @param array $ids
+     * @return int
+     */
+    public function countOrderedItems(array $ids = []): int
+    {
+        return count($this->getOrderedItems($ids));
+    }
+
+    /**
+     * @param array $ids
      * @return array
      */
     public function getOrderedItems(array $ids = []): array
     {
-        if(empty($ids)){
+        //Return all ordered items by default
+        if (empty($ids)) {
             return $this->orderedItems;
         }
 
+        //Returned filtered ordered items
         return array_values(
             array_filter($this->orderedItems, function (OrderedItem $order) use ($ids) {
                 if (in_array($order->getId(), $ids)) {
@@ -54,14 +65,6 @@ class Order
                 return false;
             })
         );
-    }
-
-    /**
-     * @return int
-     */
-    public function countOrderedItems(): int
-    {
-        return count($this->orderedItems);
     }
 
     /**

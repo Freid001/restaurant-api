@@ -76,9 +76,22 @@ class MenuItem
     }
 
     /**
+     * @param float $discount
      * @return float
      */
-    public function getPrice() : float
+    public function getDiscountPrice(?float $discount): float
+    {
+        if (is_null($discount)) {
+            return $this->getPrice();
+        }
+
+        return $this->getPrice() - ($discount * $this->getPrice());
+    }
+
+    /**
+     * @return float
+     */
+    public function getPrice(): float
     {
         return $this->price;
     }
@@ -89,19 +102,6 @@ class MenuItem
     public function setPrice(float $price): void
     {
         $this->price = $price;
-    }
-
-    /**
-     * @param float $discount
-     * @return float
-     */
-    public function getDiscountPrice(?float $discount) : float
-    {
-        if(is_null($discount)){
-            return $this->getPrice();
-        }
-
-        return $this->getPrice() - ($discount * $this->getPrice());
     }
 
     /**

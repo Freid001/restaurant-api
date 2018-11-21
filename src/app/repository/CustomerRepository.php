@@ -81,6 +81,24 @@ class CustomerRepository
     }
 
     /**
+     * @param string $firstName
+     * @param string $lastName
+     * @return int
+     */
+    public function create(string $firstName, string $lastName) : int
+    {
+        $query = 'INSERT INTO `customer` (`id`, `first_name`, `last_name`) VALUES (NULL, :first_name, :last_name)';
+        $query = $this->conn->prepare($query);
+        $query->execute([
+            ':first_name'  => $firstName,
+            ':last_name'   => $lastName,
+        ]);
+
+        return $this->conn->lastInsertId();
+    }
+
+
+    /**
      * @param $row
      * @return Customer|null
      */

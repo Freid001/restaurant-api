@@ -1,5 +1,4 @@
-log/
 vendor/
-build/
+tests/log/
 .idea/
 .gradle

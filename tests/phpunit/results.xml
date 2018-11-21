@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="app" tests="40" assertions="56" errors="0" failures="1" skipped="0" time="0.039953">
+    <testsuite name="Test\phpunit\Restaurant\BillTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/BillTest.php" tests="12" assertions="14" errors="0" failures="1" skipped="0" time="0.015722">
+      <testcase name="testSetOrder" class="Test\phpunit\Restaurant\BillTest" classname="Test.phpunit.Restaurant.BillTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/BillTest.php" line="22" assertions="2" time="0.001438"/>
+      <testcase name="testSetTransactions" class="Test\phpunit\Restaurant\BillTest" classname="Test.phpunit.Restaurant.BillTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/BillTest.php" line="38" assertions="2" time="0.001074"/>
+      <testcase name="testGetTotalPaid" class="Test\phpunit\Restaurant\BillTest" classname="Test.phpunit.Restaurant.BillTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/BillTest.php" line="58" assertions="1" time="0.001007"/>
+      <testcase name="testGetTotalCharged" class="Test\phpunit\Restaurant\BillTest" classname="Test.phpunit.Restaurant.BillTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/BillTest.php" line="79" assertions="1" time="0.000921"/>
+      <testcase name="testGetTotalDue" class="Test\phpunit\Restaurant\BillTest" classname="Test.phpunit.Restaurant.BillTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/BillTest.php" line="100" assertions="1" time="0.000956"/>
+      <testcase name="testGetTotalDiscount" class="Test\phpunit\Restaurant\BillTest" classname="Test.phpunit.Restaurant.BillTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/BillTest.php" line="120" assertions="1" time="0.003659">
+        <failure type="PHPUnit\Framework\ExpectationFailedException">Test\phpunit\Restaurant\BillTest::testGetTotalDiscount
+Failed asserting that 0.4166666666666667 matches expected 0.42.
+
+/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/BillTest.php:135
+/Users/freid/www/octane/restaurant-api/vendor/phpunit/phpunit/phpunit:53
+</failure>
+      </testcase>
+      <testcase name="testGetTotalOriginalPrice" class="Test\phpunit\Restaurant\BillTest" classname="Test.phpunit.Restaurant.BillTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/BillTest.php" line="138" assertions="1" time="0.001051"/>
+      <testcase name="testGetTotalSavings" class="Test\phpunit\Restaurant\BillTest" classname="Test.phpunit.Restaurant.BillTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/BillTest.php" line="156" assertions="1" time="0.001097"/>
+      <testcase name="testGetTotalTip" class="Test\phpunit\Restaurant\BillTest" classname="Test.phpunit.Restaurant.BillTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/BillTest.php" line="177" assertions="1" time="0.001041"/>
+      <testcase name="testGetOpenState" class="Test\phpunit\Restaurant\BillTest" classname="Test.phpunit.Restaurant.BillTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/BillTest.php" line="199" assertions="1" time="0.001095"/>
+      <testcase name="testGetPartPaidState" class="Test\phpunit\Restaurant\BillTest" classname="Test.phpunit.Restaurant.BillTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/BillTest.php" line="217" assertions="1" time="0.001311"/>
+      <testcase name="testGetClosedState" class="Test\phpunit\Restaurant\BillTest" classname="Test.phpunit.Restaurant.BillTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/BillTest.php" line="237" assertions="1" time="0.001073"/>
+    </testsuite>
+    <testsuite name="Test\phpunit\Restaurant\CustomerTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/CustomerTest.php" tests="4" assertions="4" errors="0" failures="0" skipped="0" time="0.003554">
+      <testcase name="testSetId" class="Test\phpunit\Restaurant\CustomerTest" classname="Test.phpunit.Restaurant.CustomerTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/CustomerTest.php" line="17" assertions="1" time="0.000758"/>
+      <testcase name="testSetFirstName" class="Test\phpunit\Restaurant\CustomerTest" classname="Test.phpunit.Restaurant.CustomerTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/CustomerTest.php" line="25" assertions="1" time="0.000939"/>
+      <testcase name="testSetLastName" class="Test\phpunit\Restaurant\CustomerTest" classname="Test.phpunit.Restaurant.CustomerTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/CustomerTest.php" line="32" assertions="1" time="0.000728"/>
+      <testcase name="testGetFullName" class="Test\phpunit\Restaurant\CustomerTest" classname="Test.phpunit.Restaurant.CustomerTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/CustomerTest.php" line="39" assertions="1" time="0.001129"/>
+    </testsuite>
+    <testsuite name="Test\phpunit\Restaurant\MenuItemTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/MenuItemTest.php" tests="6" assertions="6" errors="0" failures="0" skipped="0" time="0.004476">
+      <testcase name="testSetId" class="Test\phpunit\Restaurant\MenuItemTest" classname="Test.phpunit.Restaurant.MenuItemTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/MenuItemTest.php" line="17" assertions="1" time="0.000753"/>
+      <testcase name="testSetItem" class="Test\phpunit\Restaurant\MenuItemTest" classname="Test.phpunit.Restaurant.MenuItemTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/MenuItemTest.php" line="24" assertions="1" time="0.000708"/>
+      <testcase name="testSetPrice" class="Test\phpunit\Restaurant\MenuItemTest" classname="Test.phpunit.Restaurant.MenuItemTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/MenuItemTest.php" line="31" assertions="1" time="0.000703"/>
+      <testcase name="testSetAvailable" class="Test\phpunit\Restaurant\MenuItemTest" classname="Test.phpunit.Restaurant.MenuItemTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/MenuItemTest.php" line="38" assertions="1" time="0.000890"/>
+      <testcase name="testGetDiscountPrice" class="Test\phpunit\Restaurant\MenuItemTest" classname="Test.phpunit.Restaurant.MenuItemTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/MenuItemTest.php" line="45" assertions="1" time="0.000714"/>
+      <testcase name="testGetNullDiscountPrice" class="Test\phpunit\Restaurant\MenuItemTest" classname="Test.phpunit.Restaurant.MenuItemTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/MenuItemTest.php" line="51" assertions="1" time="0.000708"/>
+    </testsuite>
+    <testsuite name="Test\phpunit\Restaurant\OrderTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/OrderTest.php" tests="5" assertions="14" errors="0" failures="0" skipped="0" time="0.005079">
+      <testcase name="testSetId" class="Test\phpunit\Restaurant\OrderTest" classname="Test.phpunit.Restaurant.OrderTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/OrderTest.php" line="20" assertions="1" time="0.000813"/>
+      <testcase name="testSetCustomer" class="Test\phpunit\Restaurant\OrderTest" classname="Test.phpunit.Restaurant.OrderTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/OrderTest.php" line="28" assertions="2" time="0.000840"/>
+      <testcase name="testSetOrderedItems" class="Test\phpunit\Restaurant\OrderTest" classname="Test.phpunit.Restaurant.OrderTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/OrderTest.php" line="37" assertions="3" time="0.001018"/>
+      <testcase name="testAppendOrderedItem" class="Test\phpunit\Restaurant\OrderTest" classname="Test.phpunit.Restaurant.OrderTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/OrderTest.php" line="55" assertions="4" time="0.001248"/>
+      <testcase name="testGetOrderedItemByIds" class="Test\phpunit\Restaurant\OrderTest" classname="Test.phpunit.Restaurant.OrderTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/OrderTest.php" line="73" assertions="4" time="0.001160"/>
+    </testsuite>
+    <testsuite name="Test\phpunit\Restaurant\OrderedItemTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/OrderedItemTest.php" tests="4" assertions="5" errors="0" failures="0" skipped="0" time="0.003308">
+      <testcase name="testSetId" class="Test\phpunit\Restaurant\OrderedItemTest" classname="Test.phpunit.Restaurant.OrderedItemTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/OrderedItemTest.php" line="18" assertions="1" time="0.000787"/>
+      <testcase name="testSetItem" class="Test\phpunit\Restaurant\OrderedItemTest" classname="Test.phpunit.Restaurant.OrderedItemTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/OrderedItemTest.php" line="26" assertions="2" time="0.000900"/>
+      <testcase name="testSetPriceCharged" class="Test\phpunit\Restaurant\OrderedItemTest" classname="Test.phpunit.Restaurant.OrderedItemTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/OrderedItemTest.php" line="35" assertions="1" time="0.000780"/>
+      <testcase name="testSetDiscountCharged" class="Test\phpunit\Restaurant\OrderedItemTest" classname="Test.phpunit.Restaurant.OrderedItemTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/OrderedItemTest.php" line="43" assertions="1" time="0.000841"/>
+    </testsuite>
+    <testsuite name="Test\phpunit\Restaurant\RestaurantTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/RestaurantTest.php" tests="4" assertions="6" errors="0" failures="0" skipped="0" time="0.003390">
+      <testcase name="testSetId" class="Test\phpunit\Restaurant\RestaurantTest" classname="Test.phpunit.Restaurant.RestaurantTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/RestaurantTest.php" line="18" assertions="1" time="0.000855"/>
+      <testcase name="testSetName" class="Test\phpunit\Restaurant\RestaurantTest" classname="Test.phpunit.Restaurant.RestaurantTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/RestaurantTest.php" line="26" assertions="1" time="0.000744"/>
+      <testcase name="testSetMenuItems" class="Test\phpunit\Restaurant\RestaurantTest" classname="Test.phpunit.Restaurant.RestaurantTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/RestaurantTest.php" line="34" assertions="2" time="0.000909"/>
+      <testcase name="testAppendMenuItems" class="Test\phpunit\Restaurant\RestaurantTest" classname="Test.phpunit.Restaurant.RestaurantTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/RestaurantTest.php" line="51" assertions="2" time="0.000882"/>
+    </testsuite>
+    <testsuite name="Test\phpunit\Restaurant\TransactionTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/TransactionTest.php" tests="5" assertions="7" errors="0" failures="0" skipped="0" time="0.004423">
+      <testcase name="testSetId" class="Test\phpunit\Restaurant\TransactionTest" classname="Test.phpunit.Restaurant.TransactionTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/TransactionTest.php" line="19" assertions="1" time="0.000809"/>
+      <testcase name="testSetName" class="Test\phpunit\Restaurant\TransactionTest" classname="Test.phpunit.Restaurant.TransactionTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/TransactionTest.php" line="29" assertions="2" time="0.001027"/>
+      <testcase name="testSetOrder" class="Test\phpunit\Restaurant\TransactionTest" classname="Test.phpunit.Restaurant.TransactionTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/TransactionTest.php" line="40" assertions="2" time="0.000925"/>
+      <testcase name="testSetPaid" class="Test\phpunit\Restaurant\TransactionTest" classname="Test.phpunit.Restaurant.TransactionTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/TransactionTest.php" line="51" assertions="1" time="0.000805"/>
+      <testcase name="testSetTip" class="Test\phpunit\Restaurant\TransactionTest" classname="Test.phpunit.Restaurant.TransactionTest" file="/Users/freid/www/octane/restaurant-api/tests/phpunit/restaurant/TransactionTest.php" line="61" assertions="1" time="0.000857"/>
+    </testsuite>
+  </testsuite>
+</testsuites>

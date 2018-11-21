@@ -4,7 +4,7 @@ namespace App;
 
 
 use Restaurant\Bill;
-use Restaurant\Order;
+use Restaurant\Customer;
 use Restaurant\OrderedItem;
 use Restaurant\Transaction;
 
@@ -20,12 +20,20 @@ class BillRoute
     private $billRepository;
 
     /**
+     * @var CustomerRepository
+     */
+    private $customerRepository;
+
+    /**
      * BillRoute constructor.
      * @param BillRepository $billRepository
+     * @param CustomerRepository $customerRepository
      */
-    public function __construct(BillRepository $billRepository)
+    public function __construct(BillRepository $billRepository,
+                                CustomerRepository $customerRepository)
     {
         $this->billRepository = $billRepository;
+        $this->customerRepository = $customerRepository;
     }
 
     /**
@@ -36,24 +44,12 @@ class BillRoute
      */
     public function bills(?int $orderId, ?int $customerId, ?int $payeeId): Response
     {
-        $bills = array_map(function (Bill $bill) {
-            return [
-                'id' => $bill->getOrder()->getId(),
-                'state' => $bill->getState(),
-                'customer' => $bill->getOrder()->getCustomer()->getFullName(),
-                'ordered' => $this->formatOrderedItems($bill),
-                'transactions' => $this->formatTransactions($bill),
-                'totalOriginalPrice' => $bill->getTotalOriginalPrice(),
-                'totalDiscount' => $bill->getTotalDiscount(),
-                'totalSavings' => $bill->getTotalSavings(),
-                'totalCharged' => $bill->getTotalCharged(),
-                'totalDue' => $bill->getTotalDue(),
-                'totalTip' => $bill->getTotalTip(),
-                'totalPaid' => $bill->getTotalPaid()
-            ];
-        }, $this->billRepository->fetchAll(null, $orderId, $customerId, $payeeId));
+        $bills = $this->billRepository->fetchAll($orderId, $customerId, $payeeId);
 
-        return new Response(200, $bills);
+        return new Response(
+            !empty($bills) ? 200 : 404,
+            $this->formatBills($bills,[])
+        );
     }
 
     /**
@@ -62,15 +58,7 @@ class BillRoute
      */
     public function pay(\stdClass $body) : Response
     {
-        $errors = $this->validateBody($body);
-
-        if(isset($body->orderedId)){
-            $bill = $this->billRepository->fetch($body->orderId,null, null);
-
-            if($body->pay > $bill->getTotalDue([$body->orderedId])) {
-                $errors['pay'][] = 'Can only pay up to amount due: ' . $bill->getTotalDue([$body->orderedId]);
-            }
-        }
+        $errors = $this->validateBody($body, ['tip']);
 
         if (!empty($errors)) {
             return new Response(400, ["errors" => $errors]);
@@ -83,25 +71,12 @@ class BillRoute
             $body->pay
         );
 
-        return new Response(200,
-            array_map(function (Bill $bill) use ($body) {
-                return [
-                    'id' => $bill->getOrder()->getId(),
-                    'state' => $bill->getState(),
-                    'customer' => $bill->getOrder()->getCustomer()->getFullName(),
-                    'ordered' => $this->formatOrderedItems($bill),
-                    'transactions' => $this->formatTransactions($bill),
-                    'totalOriginalPrice' => $bill->getTotalOriginalPrice(),
-                    'totalDiscount' => $bill->getTotalDiscount(),
-                    'totalSavings' => $bill->getTotalSavings(),
-                    'totalCharged' => $bill->getTotalCharged([$body->orderedId]),
-                    'totalDue' => $bill->getTotalDue([$body->orderedId]),
-                    'totalTip' => $bill->getTotalTip(),
-                    'totalPaid' => $bill->getTotalPaid()
-                ];
-            }, [
-                $this->billRepository->fetch($body->orderId, null, $body->customerId)
-            ])
+        return new Response(
+            200,
+            $this->formatBills(
+                [$this->billRepository->fetch($body->orderId, null, $body->customerId)],
+                [$body->orderedId]
+            )
         );
     }
 
@@ -111,23 +86,26 @@ class BillRoute
      */
     public function tip(\stdClass $body) : Response
     {
-        $errors = $this->validateBody($body);
-        if (!empty($errors)) {
-            return new Response(400, ["errors" => $errors]);
-        }
+        $errors = $this->validateBody($body,['pay']);
 
         if (!empty($errors)) {
             return new Response(400, ["errors" => $errors]);
         }
 
-        $transactionId = $this->billRepository->getTransactionRepository()->create(
+        $this->billRepository->getTransactionRepository()->create(
             $body->customerId,
             $body->orderedId,
-            1,
-            $body->pay
+            true,
+            $body->tip
         );
 
-        return new Response(200, ["id" => $transactionId]);
+        return new Response(
+            200,
+            $this->formatBills(
+                [$this->billRepository->fetch($body->orderId, null, $body->customerId)],
+                [$body->orderedId]
+            )
+        );
     }
 
     /**
@@ -158,14 +136,66 @@ class BillRoute
             $errors['pay'][] = "Must be greater than 0.";
         }
 
+        if (!is_float($body->tip) && !in_array("tip", $ignore)) {
+            $errors['tip'][] = "Must be float.";
+        }
+
+        if ($body->tip < 0 && !in_array("tip", $ignore)) {
+            $errors['tip'][] = "Must be greater than 0.";
+        }
+
+        $customer = $this->customerRepository->fetch($body->customerId);
+        if (!$customer instanceof Customer) {
+            $errors["customerId"][] = "Invalid identifier.";
+        }
+
+        $bill = $this->billRepository->fetch($body->orderId,null, null);
+        if(!$bill instanceof Bill && !in_array("orderId", $ignore)){
+            $errors['orderId'][] = "Invalid identifier.";
+        }else if(isset($body->orderedId) && !in_array("orderedId", $ignore)){
+            if(count($bill->getOrder()->getOrderedItems([$body->orderedId])) == 0){
+                $errors['orderedId'][] = "Invalid identifier.";
+            }
+
+            if(($body->pay > $bill->getTotalDue([$body->orderedId])) && !in_array("pay", $ignore) ) {
+                $errors['pay'][] = 'Can only pay amount due: ' . round($bill->getTotalDue([$body->orderedId]), 2);
+            }
+        }
+
         return $errors;
     }
 
     /**
-     * @param Bill $bill
+     * @param array $bills
+     * @param array $orderedId
      * @return array
      */
-    private function formatOrderedItems(Bill $bill): array
+    private function formatBills(array $bills, array $orderedId)
+    {
+        return array_map(function (Bill $bill) use ($orderedId) {
+            return [
+                'id' => $bill->getOrder()->getId(),
+                'state' => $bill->getState($orderedId),
+                'customer' => $bill->getOrder()->getCustomer()->getFullName(),
+                'ordered' => $this->formatOrderedItems($bill, $orderedId),
+                'transactions' => $this->formatTransactions($bill, $orderedId),
+                'totalOriginalPrice' => round($bill->getTotalOriginalPrice($orderedId), 2),
+                'totalDiscount' => round($bill->getTotalDiscount($orderedId), 2),
+                'totalSavings' => round($bill->getTotalSavings($orderedId), 2),
+                'totalCharged' => round($bill->getTotalCharged($orderedId), 2),
+                'totalDue' => round($bill->getTotalDue($orderedId), 2),
+                'totalTip' => round($bill->getTotalTip(), 2),
+                'totalPaid' => round($bill->getTotalPaid($orderedId), 2)
+            ];
+        }, $bills);
+    }
+
+    /**
+     * @param Bill $bill
+     * @param array $orderedIds
+     * @return array
+     */
+    private function formatOrderedItems(Bill $bill, array $orderedIds = []): array
     {
         return array_map(function (OrderedItem $ordered) {
             return [
@@ -173,35 +203,37 @@ class BillRoute
                 "item" => [
                     "id" => $ordered->getItem()->getId(),
                     "name" => $ordered->getItem()->getItem(),
-                    "originalPrice" => $ordered->getItem()->getPrice()
+                    "originalPrice" => round($ordered->getItem()->getPrice(), 2)
                 ],
-                "priceCharged" => $ordered->getPriceCharged(),
+                "priceCharged" => round($ordered->getPriceCharged(),2),
                 "discount" => $ordered->getDiscount()
             ];
-        }, $bill->getOrder()->getOrderedItems(
-            $bill->getTransactionOrderedItemIds()
-        ));
+        }, $bill->getOrder()->getOrderedItems($orderedIds));
     }
 
     /**
      * @param Bill $bill
+     * @param array $orderedIds
      * @return array
      */
-    private function formatTransactions(Bill $bill): array
+    private function formatTransactions(Bill $bill, array $orderedIds = []): array
     {
-        return array_map(function (Transaction $transaction) {
-            return [
-                'id' => $transaction->getId(),
-                'payee' => $transaction->getCustomer()->getFullName(),
-                'ordered' => array_map(function (OrderedItem $orderedItem) {
-                    return [
-                        "id" => $orderedItem->getId(),
-                        "name" => $orderedItem->getItem()->getItem()
-                    ];
-                }, $transaction->getOrder()->getOrderedItems()),
-                'paid' => $transaction->getPaid(),
-                'tip' => $transaction->isTip()
-            ];
-        }, $bill->getTransactions());
+        return array_reduce($bill->getTransactions(), function ($transactions, Transaction $transaction) use ($orderedIds){
+            if($transaction->getOrder()->getOrderedItems($orderedIds)) {
+                $transactions[] = [
+                    'id' => $transaction->getId(),
+                    'payee' => $transaction->getCustomer()->getFullName(),
+                    'ordered' => array_map(function (OrderedItem $orderedItem) {
+                        return [
+                            "id" => $orderedItem->getId(),
+                            "name" => $orderedItem->getItem()->getItem()
+                        ];
+                    }, $transaction->getOrder()->getOrderedItems()),
+                    'paid' => round($transaction->getPaid(),2),
+                    'tip' => round($transaction->isTip(), 2)
+                ];
+            }
+            return $transactions;
+        }, []);
     }
 }

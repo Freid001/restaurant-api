@@ -30,7 +30,7 @@ class CustomerRoute
      * @param $lastName
      * @return Response
      */
-    public function customers($firstName, $lastName): Response
+    public function customers(?string $firstName, ?string $lastName): Response
     {
         $customers = array_map(function(Customer $customer){
             return [
@@ -41,5 +41,48 @@ class CustomerRoute
         }, $this->customerRepository->fetchAll($firstName, $lastName));
 
         return new Response(!empty($customers) ? 200 : 404, $customers);
+    }
+
+    /**
+     * @param \stdClass $body
+     * @return Response
+     */
+    public function createCustomer(\stdClass $body): Response
+    {
+        $errors = $this->validateBody($body);
+
+        if (!empty($errors)) {
+            return new Response(400, ["errors" => $errors]);
+        }
+
+        $customerId = $this->customerRepository->create($body->firstName, $body->lastName);
+        $customer = $this->customerRepository->fetch($customerId);
+
+        return new Response(201, [
+            "id"        => $customer->getId(),
+            "firstName" => $customer->getFirstName(),
+            "lastName"  => $customer->getLastName()
+        ]);
+    }
+
+    /**
+     * @param \stdClass $body
+     * @param array $ignore
+     * @return array
+     */
+    private function validateBody(\stdClass $body, $ignore = []): array
+    {
+        $errors = [];
+        if (!(strlen($body->firstName) >= 2 && strlen($body->firstName) <= 255) &&
+            !in_array("firstName", $ignore)) {
+            $errors['firstName'][] = "Must be between 2 than 255 characters.";
+        }
+
+        if (!(strlen($body->lastName) >= 2 && strlen($body->lastName) <= 255) &&
+            !in_array("lastName", $ignore)) {
+            $errors['lastName'][] = "Must be between 2 than 255 characters.";
+        }
+
+        return $errors;
     }
 }

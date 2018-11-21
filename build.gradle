@@ -13,15 +13,39 @@ buildscript {
     }
 }
 
+import groovy.json.JsonSlurper
+
 plugins {
     id "org.flywaydb.flyway" version "5.0.7"
     id "org.ajoberstar.grgit" version "3.0.0-rc.3"
 }
 
+flyway {
+    url = dbHost
+    schemas = ['restaurant']
+    table = "schema_history"
+    user = dbUserName
+    password = dbPassword
+    locations = ['filesystem:db']
+}
+
+flywayClean.dependsOn = ["run"]
+flywayMigrate.dependsOn = ["run"]
+
 def version = new File("VERSION").text
-//def ghash = grgit.head().id
+def ghash = grgit.head().id
+
 def date() {
     return new Date().format('yyyyMMdd HHmmssZ')
+}
+
+task incrementVersion {
+    doLast {
+        def versionFile = new File("VERSION")
+        def versionTuple = versionFile.text.tokenize(".").collect({s -> s.toInteger()})
+        versionTuple[2] += 1
+        versionFile.text = versionTuple.join(".")
+    }
 }
 
 task build {
@@ -29,7 +53,7 @@ task build {
         exec {
             commandLine 'docker', 'build',
                     '--build-arg', "VERSION=${version}",
-                    //'--build-arg', "GHASH=${ghash}",
+                    '--build-arg', "GHASH=${ghash}",
                     '--build-arg', "BUILD_TIME=date()",
                     '-t', "restaurant-api:${version}", "${System.getProperty("user.dir")}"
         }
@@ -41,26 +65,65 @@ task build {
 
 task run {
     dependsOn = ["build"]
-    doLast {
+    doFirst {
         exec {
             commandLine 'docker-compose', 'up', "-d"
+        }
+    }
+    doLast {
+        String url = 'http://localhost:8000/health'
+        String status = '';
+        int count = 0
+        while (count < 15 && !(status == 'up')) {
+            println 'Trying to connect to \'' + url + '\' : Attempt number=' + count
+
+            try {
+                count += 1
+                JsonSlurper jsonSlurper = new JsonSlurper();
+                String responceBody = url.toURL().text
+                Object result = jsonSlurper.parseText(responceBody);
+                Map jsonResult = (Map) result;
+                status = (String) jsonResult.get('data').get('status');
+                sleep(5 * 1000)
+            } catch (all) {
+                sleep(5 * 1000) // wait for another 5 seconds until next retry
+            }
+        }
+
+        if (status == 'up') {
+            println 'Connected to \'' + url + '\' : App status=UP'
+        }else if (status == 'down') {
+            println 'Connected to \'' + url + '\' : App status=DOWN'
+            println 'You may need to run \'gradle flywayMigrate\''
+        } else {
+            throw new GradleException('FAILED to connect to \'' + url + '\'')
         }
     }
 }
 
 task stop {
-    doLast {
-        exec {
-            commandLine 'docker-compose', 'down'
-        }
-    }
+     doLast {
+         exec {
+             commandLine 'docker-compose', 'down'
+         }
+     }
 }
 
-flyway {
-    url = dbHost
-    schemas = ['restaurant']
-    table = "schema_history"
-    user = dbUserName
-    password = dbPassword
-    locations = ['filesystem:db']
+task unitTest {
+     doLast {
+         exec {
+             commandLine 'phpunit'
+         }
+     }
+}
+
+task componentTest{
+    dependsOn = ["flywayClean", "flywayMigrate"]
+    doLast {
+        exec {
+            environment "DB_USER", "${dbUserName}"
+            environment "DB_PASSWORD", "${dbPassword}"
+            commandLine 'vendor/bin/behat', '--config', 'behat.yml'
+        }
+    }
 }

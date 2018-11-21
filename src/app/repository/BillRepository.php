@@ -44,12 +44,12 @@ class BillRepository
     }
 
     /**
-     * @param int $orderId
+     * @param int|null $orderId
      * @param int|null $customerId
      * @param int|null $payeeId
      * @return Bill|null
      */
-    public function fetch(int $orderId, ?int $customerId, ?int $payeeId) : ?Bill
+    public function fetch(?int $orderId, ?int $customerId, ?int $payeeId) : ?Bill
     {
         $result = $this->fetchAll($orderId, $customerId, $payeeId);
 

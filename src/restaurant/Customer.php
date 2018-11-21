@@ -55,6 +55,14 @@ class Customer
     /**
      * @return string
      */
+    public function getFullName()
+    {
+        return $this->getFirstName() . " " . $this->getLastName();
+    }
+
+    /**
+     * @return string
+     */
     public function getFirstName(): string
     {
         return $this->firstName;
@@ -82,13 +90,5 @@ class Customer
     public function setLastName(string $lastName): void
     {
         $this->lastName = $lastName;
-    }
-
-    /**
-     * @return string
-     */
-    public function getFullName()
-    {
-        return $this->getFirstName() . " " . $this->getLastName();
     }
 }

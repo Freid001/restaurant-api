@@ -60,14 +60,14 @@ class OrderRoute
             ];
         }, $this->orderRepository->fetchAll($orderId, $customerId));
 
-        return new Response(!empty($customerId) ? 200 : 404, $orders);
+        return new Response(!empty($orders) ? 200 : 404, $orders);
     }
 
     /**
      * @param $body
      * @return Response
      */
-    public function createOrder($body): Response
+    public function createOrder(\stdClass $body): Response
     {
         $errors = $this->validateBody($body,['orderId']);
 
