@@ -178,7 +178,38 @@ Feature: Order
     }
     """
 
-  Scenario: create order with unavailable item
+  Scenario: fetch orders
+    Given the "Content-Type" request header is "application/json"
+    When I request "/orders" using HTTP GET
+    Then the response code is 200
+    Then the response body contains JSON:
+    """
+    {
+      "meta": {
+        "status": "@variableType(string)"
+      },
+      "data": [
+        {
+          "id": "@variableType(integer)",
+          "customer": "@variableType(string)",
+          "items": [
+            {
+              "id": "@variableType(integer)",
+              "item": {
+                  "id": "@variableType(integer)",
+                  "name": "@variableType(string)",
+                  "originalPrice": "@variableType(float)"
+              },
+              "priceCharged": "@variableType(float)",
+              "discount": "@variableType(integer)"
+            }
+          ]
+        }
+      ]
+    }
+    """
+
+  Scenario: try to create order with unavailable item
     Given the request body is:
     """
     {
@@ -204,7 +235,7 @@ Feature: Order
     }
     """
 
-  Scenario: append unavailable item
+  Scenario: try to append unavailable item
     Given the request body is:
     """
     {

@@ -42,7 +42,7 @@ class OrderRepository
      */
     public function fetch(int $orderId) : ?Order
     {
-        $result = $this->fetchAll($orderId, null, null);
+        $result = $this->fetchAll($orderId,  null);
 
         return isset($result[0]) ? $result[0] : null;
     }

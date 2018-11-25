@@ -16,7 +16,7 @@ class FeatureContext extends ApiContext
 
         $query = $pdo->query("TRUNCATE TABLE `customer`;
                                         TRUNCATE TABLE `restaurant`;
-                                        TRUNCATE TABLE `menu`;  
+                                        TRUNCATE TABLE `menu`;
                                         TRUNCATE TABLE `order`;
                                         TRUNCATE TABLE `ordered`;
                                         TRUNCATE TABLE `transaction`;

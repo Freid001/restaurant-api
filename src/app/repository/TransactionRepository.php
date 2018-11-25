@@ -38,6 +38,17 @@ class TransactionRepository
     }
 
     /**
+     * @param $orderId
+     * @return Transaction|null
+     */
+    public function fetch($orderId): ?Transaction
+    {
+        $result = $this->fetchAll($orderId,  null);
+
+        return isset($result[0]) ? $result[0] : null;
+    }
+
+    /**
      * @param int|null $orderId
      * @param int|null $customerId
      * @return array
@@ -101,7 +112,7 @@ class TransactionRepository
         $query->execute([
             ':customer_id'  => $customerId,
             ':ordered_id'   => $orderedId,
-            ':tip'          => $tip,
+            ':tip'          => $tip ? 1 : 0,
             ':paid'         => $paid
         ]);
 

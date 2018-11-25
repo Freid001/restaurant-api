@@ -58,7 +58,7 @@ class BillRoute
      */
     public function pay(\stdClass $body) : Response
     {
-        $errors = $this->validateBody($body, ['tip']);
+        $errors = $this->validateBody($body,['tip']);
 
         if (!empty($errors)) {
             return new Response(400, ["errors" => $errors]);
@@ -74,7 +74,7 @@ class BillRoute
         return new Response(
             200,
             $this->formatBills(
-                [$this->billRepository->fetch($body->orderId, null, $body->customerId)],
+                [$this->billRepository->fetch($body->orderId, null, null)],
                 [$body->orderedId]
             )
         );
@@ -102,7 +102,7 @@ class BillRoute
         return new Response(
             200,
             $this->formatBills(
-                [$this->billRepository->fetch($body->orderId, null, $body->customerId)],
+                [$this->billRepository->fetch($body->orderId, null, null)],
                 [$body->orderedId]
             )
         );
@@ -157,7 +157,7 @@ class BillRoute
                 $errors['orderedId'][] = "Invalid identifier.";
             }
 
-            if(($body->pay > $bill->getTotalDue([$body->orderedId])) && !in_array("pay", $ignore) ) {
+            if(($body->pay - $bill->getTotalDue([$body->orderedId]) > 0) && !in_array("pay", $ignore) ) {
                 $errors['pay'][] = 'Can only pay amount due: ' . round($bill->getTotalDue([$body->orderedId]), 2);
             }
         }

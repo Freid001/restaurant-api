@@ -38,11 +38,13 @@ class OrderRoute
      */
     public function __construct(OrderRepository $orderRepository,
                                 RestaurantRepository $restaurantRepository,
-                                CustomerRepository $customerRepository)
+                                CustomerRepository $customerRepository,
+                                TransactionRepository $transactionRepository)
     {
         $this->orderRepository = $orderRepository;
         $this->restaurantRepository = $restaurantRepository;
         $this->customerRepository = $customerRepository;
+        $this->transactionRepository = $transactionRepository;
     }
 
     /**
@@ -69,19 +71,17 @@ class OrderRoute
      */
     public function createOrder(\stdClass $body): Response
     {
-        $errors = $this->validateBody($body,['orderId']);
-
-        $customer = $this->customerRepository->fetch($body->customerId);
-        if (!$customer instanceof Customer) {
-            $errors["customerId"][] = "Invalid identifier.";
+        $customer = null;
+        if(is_int($body->customerId)) {
+            $customer = $this->customerRepository->fetch($body->customerId);
         }
 
-        $item = $this->restaurantRepository->fetchMenuItem($body->itemId);
-        if (!$item instanceof MenuItem) {
-            $errors["itemId"][] = "Invalid identifier.";
-        }else if(!$item->isAvailable()){
-            $errors["itemId"][] = "Item is not available.";
+        $item = null;
+        if(is_int($body->itemId)){
+            $item = $this->restaurantRepository->fetchMenuItem($body->itemId);
         }
+
+        $errors = $this->validateBody($body,$customer, null, $item, ['orderId']);
 
         if (!empty($errors)) {
             return new Response(400, ["errors" => $errors]);
@@ -111,24 +111,22 @@ class OrderRoute
      */
     public function appendItem(\stdClass $body): Response
     {
-        $errors = $this->validateBody($body,['customerId']);
-
-        $order = $this->orderRepository->fetch($body->orderId);
-        if (!$order instanceof Order) {
-            $errors["orderId"][] = "Invalid identifier.";
+        $order = null;
+        if(is_int($body->orderId)) {
+            $order = $this->orderRepository->fetch($body->orderId);
         }
 
-//todo: check transactions
+        $item = null;
+        if(is_int($body->itemId)){
+            $item = $this->restaurantRepository->fetchMenuItem($body->itemId);
+        }
+
+        //todo: check transactions
 //        else if($order->isClosed()){
 //            $errors["orderId"][] = "Can not append item to closed order.";
 //        }
 
-        $item = $this->restaurantRepository->fetchMenuItem($body->itemId);
-        if (!$item instanceof MenuItem) {
-            $errors["itemId"][] = "Invalid identifier.";
-        }else if(!$item->isAvailable()){
-            $errors["itemId"][] = "Item is not available.";
-        }
+        $errors = $this->validateBody($body, null, $order, $item, ['customerId']);
 
         if (!empty($errors)) {
             return new Response(400, ["errors" => $errors]);
@@ -173,6 +171,9 @@ class OrderRoute
 //            $errors["orderId"][] = "Must be an open order.";
 //        }
 
+//        $transactions = $this->transactionRepository->fetch($orderId);
+
+
         if (!empty($errors)) {
             return new Response(400, ["errors" => $errors]);
         }
@@ -188,13 +189,6 @@ class OrderRoute
      */
     public function deleteOrder(?int $orderId): Response
     {
-        $order = $this->orderRepository->fetch($orderId);
-
-        $errors = [];
-        if (!$order instanceof Order) {
-            $errors["orderId"][] = "Invalid identifier.";
-        }
-
 //todo - check transactions
 //        if ($order->getState() != "open") {
 //            $errors["orderId"][] = "Can not delete order which is not open.";
@@ -211,22 +205,45 @@ class OrderRoute
 
     /**
      * @param \stdClass $body
+     * @param Customer|null $customer
+     * @param Order|null $order
+     * @param MenuItem|null $item
      * @param array $ignore
      * @return array
      */
-    private function validateBody(\stdClass $body, $ignore = []): array
+    private function validateBody(\stdClass $body, ?Customer $customer, ?Order $order, ?MenuItem $item, $ignore = []): array
     {
         $errors = [];
-        if (!is_int($body->itemId) && !in_array("orderId", $ignore)) {
-            $errors['orderId'][] = "Must be integer.";
+        if(!in_array("orderId", $ignore)) {
+            if (!is_int($body->itemId)) {
+                $errors['orderId'][] = "Must be integer.";
+            }
+
+            if (!$order instanceof Order) {
+                $errors["orderId"][] = "Invalid identifier.";
+            }
         }
 
-        if (!is_int($body->customerId) && !in_array("customerId", $ignore)) {
-            $errors['customerId'][] = "Must be integer.";
+        if(!in_array("customerId", $ignore)) {
+            if (!is_int($body->customerId)) {
+                $errors['customerId'][] = "Must be integer.";
+            }
+
+            if (!$customer instanceof Customer) {
+                $errors["customerId"][] = "Invalid identifier.";
+            }
         }
 
-        if (!is_int($body->itemId) && !in_array("itemId", $ignore)) {
-            $errors['itemId'][] = "Must be integer.";
+        if(!in_array("itemId", $ignore)) {
+            if (!is_int($body->itemId)) {
+                $errors['itemId'][] = "Must be integer.";
+            }
+
+            if (!$item instanceof MenuItem) {
+                $errors["itemId"][] = "Invalid identifier.";
+            } else if (!$item->isAvailable()) {
+                $errors["itemId"][] = "Item is not available.";
+            }
         }
 
         if (!in_array("discount", $ignore)) {
