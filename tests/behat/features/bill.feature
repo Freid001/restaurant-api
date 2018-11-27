@@ -434,7 +434,53 @@ Feature: Customer is billed
         "status": "@variableType(string)"
       },
       "data": {
-        "errors": "@variableType(array)"
+        "errors": {
+          "orderId" : "@variableType(array)"
+        }
+      }
+    }
+    """
+
+  Scenario: try to remove orderedItem
+    Given the "Content-Type" request header is "application/json"
+    When I request "/order/item?orderId=1&itemId=1" using HTTP DELETE
+    Then the response code is 400
+    Then the response body contains JSON:
+    """
+    {
+      "meta": {
+        "status": "@variableType(string)"
+      },
+      "data": {
+        "errors": {
+          "itemId": "@variableType(array)"
+        }
+      }
+    }
+    """
+
+  Scenario: try to append item to closed order
+    Given the request body is:
+    """
+    {
+      "orderId": 1,
+      "itemId": 1,
+      "discount": 0.0
+    }
+    """
+    And the "Content-Type" request header is "application/json"
+    When I request "/order/item" using HTTP POST
+    Then the response code is 400
+    Then the response body contains JSON:
+    """
+    {
+      "meta": {
+        "status": "@variableType(string)"
+      },
+      "data": {
+        "errors": {
+          "orderId" : "@variableType(array)"
+        }
       }
     }
     """

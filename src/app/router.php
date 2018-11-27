@@ -2,6 +2,10 @@
 
 namespace App;
 
+use Restaurant\Bill;
+use Restaurant\Customer;
+use Restaurant\Order;
+
 /**
  * Class Routes
  * @package App
@@ -160,7 +164,8 @@ class Router
                         new OrderRepository($this->pdo, $this->helper),
                         new RestaurantRepository($this->pdo, $this->helper),
                         new CustomerRepository($this->pdo, $this->helper),
-                        new TransactionRepository($this->pdo, $this->helper)
+                        new TransactionRepository($this->pdo, $this->helper),
+                        new Bill(new Order(0, new Customer(0,"",""), []))
                     );
 
                     return $orders->orders(
@@ -173,7 +178,8 @@ class Router
                         new OrderRepository($this->pdo, $this->helper),
                         new RestaurantRepository($this->pdo, $this->helper),
                         new CustomerRepository($this->pdo, $this->helper),
-                        new TransactionRepository($this->pdo, $this->helper)
+                        new TransactionRepository($this->pdo, $this->helper),
+                        new Bill(new Order(0, new Customer(0,"",""), []))
                     );
 
                     return $order->createOrder($this->parseJsonBody());
@@ -183,7 +189,8 @@ class Router
                         new OrderRepository($this->pdo, $this->helper),
                         new RestaurantRepository($this->pdo, $this->helper),
                         new CustomerRepository($this->pdo, $this->helper),
-                        new TransactionRepository($this->pdo, $this->helper)
+                        new TransactionRepository($this->pdo, $this->helper),
+                        new Bill(new Order(0, new Customer(0,"",""), []))
                     );
 
                     return $order->appendItem($this->parseJsonBody());
@@ -193,12 +200,13 @@ class Router
                         new OrderRepository($this->pdo, $this->helper),
                         new RestaurantRepository($this->pdo, $this->helper),
                         new CustomerRepository($this->pdo, $this->helper),
-                        new TransactionRepository($this->pdo, $this->helper)
+                        new TransactionRepository($this->pdo, $this->helper),
+                        new Bill(new Order(0, new Customer(0,"",""), []))
                     );
 
                     return $order->removeItem(
                         (int)$this->getParameter("orderId"),
-                        (int)$this->getParameter("item_id")
+                        (int)$this->getParameter("itemId")
                     );
 
                 case "DELETE /order":
@@ -206,7 +214,8 @@ class Router
                         new OrderRepository($this->pdo, $this->helper),
                         new RestaurantRepository($this->pdo, $this->helper),
                         new CustomerRepository($this->pdo, $this->helper),
-                        new TransactionRepository($this->pdo, $this->helper)
+                        new TransactionRepository($this->pdo, $this->helper),
+                        new Bill(new Order(0, new Customer(0,"",""), []))
                     );
 
                     return $order->deleteOrder(

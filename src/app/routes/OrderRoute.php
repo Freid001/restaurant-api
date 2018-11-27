@@ -3,11 +3,13 @@
 namespace App;
 
 
+use Restaurant\Bill;
 use Restaurant\Customer;
 use Restaurant\MenuItem;
 use Restaurant\Order;
 use Restaurant\OrderedItem;
 use Restaurant\Restaurant;
+use Restaurant\Transaction;
 
 /**
  * Class OrderRoute
@@ -31,20 +33,34 @@ class OrderRoute
     private $customerRepository;
 
     /**
+     * @var TransactionRepository
+     */
+    private $transactionRepository;
+
+    /**
+     * @var Bill
+     */
+    private $bill;
+
+    /**
      * OrderRoute constructor.
      * @param OrderRepository $orderRepository
      * @param RestaurantRepository $restaurantRepository
      * @param CustomerRepository $customerRepository
+     * @param TransactionRepository $transactionRepository
+     * @param Bill $bill
      */
     public function __construct(OrderRepository $orderRepository,
                                 RestaurantRepository $restaurantRepository,
                                 CustomerRepository $customerRepository,
-                                TransactionRepository $transactionRepository)
+                                TransactionRepository $transactionRepository,
+                                Bill $bill)
     {
         $this->orderRepository = $orderRepository;
         $this->restaurantRepository = $restaurantRepository;
         $this->customerRepository = $customerRepository;
         $this->transactionRepository = $transactionRepository;
+        $this->bill = $bill;
     }
 
     /**
@@ -72,16 +88,16 @@ class OrderRoute
     public function createOrder(\stdClass $body): Response
     {
         $customer = null;
-        if(is_int($body->customerId)) {
+        if (is_int($body->customerId)) {
             $customer = $this->customerRepository->fetch($body->customerId);
         }
 
         $item = null;
-        if(is_int($body->itemId)){
+        if (is_int($body->itemId)) {
             $item = $this->restaurantRepository->fetchMenuItem($body->itemId);
         }
 
-        $errors = $this->validateBody($body,$customer, null, $item, ['orderId']);
+        $errors = $this->validateBody($body, $customer, null, $item, ['orderId']);
 
         if (!empty($errors)) {
             return new Response(400, ["errors" => $errors]);
@@ -111,22 +127,30 @@ class OrderRoute
      */
     public function appendItem(\stdClass $body): Response
     {
+        $errors = [];
+
         $order = null;
-        if(is_int($body->orderId)) {
+        if (is_int($body->orderId)) {
             $order = $this->orderRepository->fetch($body->orderId);
+            $transactions = $this->transactionRepository->fetchAll($body->orderId, null);
+
+            if (!is_null($order)) {
+                $this->bill->setOrder($order);
+            }
+
+            $this->bill->setTransactions($transactions);
+        }
+
+        if ($this->bill->getState() == "closed") {
+            $errors["orderId"][] = "Can not append item to closed order.";
         }
 
         $item = null;
-        if(is_int($body->itemId)){
+        if (is_int($body->itemId)) {
             $item = $this->restaurantRepository->fetchMenuItem($body->itemId);
         }
 
-        //todo: check transactions
-//        else if($order->isClosed()){
-//            $errors["orderId"][] = "Can not append item to closed order.";
-//        }
-
-        $errors = $this->validateBody($body, null, $order, $item, ['customerId']);
+        $errors = array_merge($errors, $this->validateBody($body, null, $order, $item, ['customerId']));
 
         if (!empty($errors)) {
             return new Response(400, ["errors" => $errors]);
@@ -156,23 +180,24 @@ class OrderRoute
     public function removeItem(?int $orderId, ?int $itemId): Response
     {
         $order = $this->orderRepository->fetch($orderId);
+        $transactions = $this->transactionRepository->fetchAll($orderId, null);
 
         $errors = [];
         if (!$order instanceof Order) {
             $errors["orderId"][] = "Invalid identifier.";
+        }else {
+            if (($order->countOrderedItems()-1) == 0) {
+                $errors["orderId"][] = "Must have at least one ordered item in order.";
+            }
+
+            $this->bill->setOrder($order);
         }
 
-        if(($order->countOrderedItems()-1) == 0){
-            $errors["orderId"][] = "Must have at least one ordered item.";
+        $this->bill->setTransactions($transactions);
+
+        if (in_array($itemId, $this->bill->getTransactionOrderedItemIds())) {
+            $errors["itemId"][] = "Can not remove item which has transactions associated with it.";
         }
-
-//todo: check transactions
-//        if ($order->getState() != "open") {
-//            $errors["orderId"][] = "Must be an open order.";
-//        }
-
-//        $transactions = $this->transactionRepository->fetch($orderId);
-
 
         if (!empty($errors)) {
             return new Response(400, ["errors" => $errors]);
@@ -189,10 +214,12 @@ class OrderRoute
      */
     public function deleteOrder(?int $orderId): Response
     {
-//todo - check transactions
-//        if ($order->getState() != "open") {
-//            $errors["orderId"][] = "Can not delete order which is not open.";
-//        }
+        $transactions = $this->transactionRepository->fetchAll($orderId, null);
+
+        $errors = [];
+        if (!empty($transactions)) {
+            $errors["orderId"][] = "Can not delete order which has transactions associated with it.";
+        }
 
         if (!empty($errors)) {
             return new Response(400, ["errors" => $errors]);
@@ -214,7 +241,7 @@ class OrderRoute
     private function validateBody(\stdClass $body, ?Customer $customer, ?Order $order, ?MenuItem $item, $ignore = []): array
     {
         $errors = [];
-        if(!in_array("orderId", $ignore)) {
+        if (!in_array("orderId", $ignore)) {
             if (!is_int($body->itemId)) {
                 $errors['orderId'][] = "Must be integer.";
             }
@@ -224,7 +251,7 @@ class OrderRoute
             }
         }
 
-        if(!in_array("customerId", $ignore)) {
+        if (!in_array("customerId", $ignore)) {
             if (!is_int($body->customerId)) {
                 $errors['customerId'][] = "Must be integer.";
             }
@@ -234,7 +261,7 @@ class OrderRoute
             }
         }
 
-        if(!in_array("itemId", $ignore)) {
+        if (!in_array("itemId", $ignore)) {
             if (!is_int($body->itemId)) {
                 $errors['itemId'][] = "Must be integer.";
             }

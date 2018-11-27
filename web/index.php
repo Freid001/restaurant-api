@@ -4,6 +4,8 @@ require_once('../vendor/autoload.php');
 
 use App\Router;
 
+error_reporting(E_ERROR | E_WARNING | E_PARSE);
+
 $router = new Router(
     isset($_SERVER['REQUEST_METHOD']) ? $_SERVER['REQUEST_METHOD'] : null,
     isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : "",
