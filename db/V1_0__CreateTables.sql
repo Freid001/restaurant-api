@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `menu`
   `id`            int(11)      NOT NULL AUTO_INCREMENT,
   `restaurant_id` int(11)      NOT NULL,
   `item`          varchar(255) NOT NULL,
-  `price`         decimal(5,2) NOT NULL,
+  `price`         float(5,2) NOT NULL,
   `available`     bool DEFAULT false,
   PRIMARY KEY (id)
 ) ENGINE = InnoDB
@@ -46,8 +46,8 @@ CREATE TABLE IF NOT EXISTS `ordered`
   `id`            int(11) NOT NULL AUTO_INCREMENT,
   `order_id`      int(11) NOT NULL,
   `item_id`       int(11) NOT NULL,
-  `price_charged` decimal(5,2) DEFAULT 0.0,
-  `discount`      decimal(5,2) DEFAULT 0.0,
+  `price_charged` float(5,2) DEFAULT 0.0,
+  `discount`      float(5,2) DEFAULT 0.0,
   PRIMARY KEY (id)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS `transaction`
   `customer_id`     int(11) NOT NULL,
   `ordered_id`      int(11) NOT NULL,
   `tip`             bool DEFAULT false,
-  `paid`            decimal(5,2) DEFAULT 0.0,
+  `paid`            float(5,2) DEFAULT 0.0,
   PRIMARY KEY (id)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8;

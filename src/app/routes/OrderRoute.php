@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App;
 
 
@@ -8,8 +10,6 @@ use Restaurant\Customer;
 use Restaurant\MenuItem;
 use Restaurant\Order;
 use Restaurant\OrderedItem;
-use Restaurant\Restaurant;
-use Restaurant\Transaction;
 
 /**
  * Class OrderRoute

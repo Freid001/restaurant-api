@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Restaurant;
 
 /**
@@ -19,7 +21,7 @@ class Transaction
     private $customer;
 
     /**
-     * @var OrderedItem
+     * @var Order
      */
     private $order;
 

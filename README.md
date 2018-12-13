@@ -1,7 +1,7 @@
 # Restaurant api
 
 ## About
-...
+Simple api which allows customers to split their bill, see [SLO](SLO.md)
 
 ### Requirements
 * [Docker](https://www.docker.com/)
@@ -33,120 +33,127 @@ gradle componentTest
 ```
 http://localhost:8000
 ```
+##### POST /customer
+
+###### body
+```json
+{
+    "firstName": "john",
+    "lastName": "smith"
+}
+```
+``
+###### response
+```json
+{
+    "meta": {
+        "status": "created"
+    },
+    "data": {
+        "id": 1,
+        "firstName": "john",
+        "lastName": "smith"
+    } 
+}
+```
 
 ##### GET /customers?firstName={first_name}&lastName={last_name}
 
 ###### response
 ```json
-[
-    {
-        "id": 1,
-        "firstName": "Lucas",
-        "lastName": "Maxwell"
+{
+    "meta": {
+        "status": "ok"
     },
-    {
-        "id": 2,
-        "firstName": "Samantha",
-        "lastName": "Carpenter"
-    },
-    {
-        "id": 3,
-        "firstName": "Sonya",
-        "lastName": "Sandoval"
-    }
-]
-```
-
-##### GET /restaurants?restaurant={restaurant}&item={item}&available={available}
-
-###### response
-```json
-[
-    {
-        "id": 1,
-        "restaurant": "dominos",
-        "menu": [
-            {
-                "id": 1,
-                "item": "hawaiian pizza",
-                "price": 9.99,
-                "available": true
-            },
-            {
-                "id": 2,
-                "item": "bbq pizza",
-                "price": 10.99,
-                "available": false
-            },
-            {
-                "id": 3,
-                "item": "margherita pizza",
-                "price": 5.99,
-                "available": false
-            },
-            {
-                "id": 4,
-                "item": "pepperoni pizza",
-                "price": 7.99,
-                "available": true
-            }
-        ]
-    }
-]
-```
-
-##### GET /orders?orderId={order_id}&customerId={customer_id}&closed={closed}
-
-###### response
-```json
-[
-  {
-    "id": 1,
-    "state": "closed",
-    "customer": "Lucas Maxwell",
-    "items": 
-    [
+    "data": [
         {
             "id": 1,
-            "item": {
-                "id": 1,
-                "name": "hawaiian pizza",
-                "originalPrice": 9.99
-            },
-            "priceCharged": 9.99,
-            "discount": 0
+            "firstName": "john",
+            "lastName": "smith"
         },
         {
             "id": 2,
-            "item": {
-                "id": 2,
-                "name": "bbq pizza",
-                "originalPrice": 10.99
-            },
-            "priceCharged": 9.99,
-            "discount": 0
+            "firstName": "david",
+            "lastName": "jones"
         }
     ]
-  },
-  {
-    "id": 2,
-    "state": "open",
-    "customer": "Samantha Carpenter",
-    "items": 
-    [
+}
+```
+
+##### POST /restaurant
+
+###### body
+```json
+{
+    "restaurant": "dominos",
+    "cuisine": "pizza",
+    "menu": [
         {
-            "id": 3,
-            "item": {
-                "id": 3,
-                "name": "margherita pizza",
-                "originalPrice": 5.99
-            },
-        "priceCharged": 1,
-        "discount": 0
+            "item": "margherita pizza",
+            "price": 5.99,
+            "available": true
+        },
+        {
+            "item": "pepperoni pizza",
+            "price": 9.99,
+            "available": false
         }
     ]
-  }
-]
+}
+```
+
+###### response
+```json
+{
+    "meta": {
+        "status": "created"
+    },
+    "data": {
+        "restaurant": "dominos",
+        "cuisine": "pizza",
+        "menu": [
+            {
+                "item": "margherita pizza",
+                "price": 5.99,
+                "available": true
+            },
+            {
+                "item": "pepperoni pizza",
+                "price": 9.99,
+                "available": false
+            }
+        ]
+    }
+}
+```
+
+##### GET /restaurants?restaurant={restaurant}&item={item}&&available={last_name}
+
+###### response
+```json
+{
+    "meta": {
+        "status": "ok"
+    },
+    "data": [
+        {
+            "restaurant": "dominos",
+            "cuisine": "pizza",
+            "menu": [
+                {
+                    "item": "margherita pizza",
+                    "price": 5.99,
+                    "available": true
+                },
+                {
+                    "item": "pepperoni pizza",
+                    "price": 9.99,
+                    "available": false
+                }
+            ]
+        }
+    ]
+}
 ```
 
 ##### POST /order
@@ -154,65 +161,330 @@ http://localhost:8000
 ###### body
 ```json
 {
-	"customerId": 1,
-	"itemId": 4,
-	"discount": 0.25
+    "customerId": 1,
+    "itemId": 1,
+    "discount": 0.0
 }
 ```
 
 ###### response
 ```json
 {
-    "id": 1,
-    "state": "open",
-    "customer": "Lucas Maxwell",
-    "items": [
-        {
-            "id": 7,
+    "meta": {
+        "status": "created"
+    },
+    "data": {
+        "id": 1,
+        "customer": "john smith",
+        "items": [
+          {
+            "id": 1,
             "item": {
-                "id": 4,
-                "name": "pepperoni pizza",
-                "originalPrice": 7.99
+                "id": 1,
+                "name": "margherita pizza",
+                "originalPrice": 5.99
             },
             "priceCharged": 5.99,
-            "discount": 0.25
+            "discount": 0.0
+          }
+        ]
+    }
+}
+```
+
+##### GET /orders
+
+###### response
+```json
+{
+    "meta": {
+        "status": "ok"
+    },
+    "data": [
+        {
+            "id": 1,
+            "customer": "john smith",
+            "items": [
+                {
+                    "id": 1,
+                    "item": {
+                        "id": 1,
+                        "name": "margherita pizza",
+                        "originalPrice": 5.99
+                    },
+                    "priceCharged": 5.99,
+                    "discount": 0.0
+                }
+            ]
         }
     ]
 }
 ```
 
-##### POST /order/item?orderId={order_id}
+##### POST /order/item
 
 ###### body
 ```json
 {
-	"itemId": 4,
-	"discount": 0.10
+    "customerId": 1,
+    "itemId": 1,
+    "discount": 0.5
 }
 ```
 
 ###### response
 ```json
 {
-
+    "meta": {
+        "status": "created"
+    },
+    "data": {
+        "id": 1,
+        "customer": "john smith",
+        "items": [
+            {
+                "id": 1,
+                "item": {
+                    "id": 1,
+                    "name": "margherita pizza",
+                    "originalPrice": 5.99
+                },
+                "priceCharged": 5.99,
+                "discount": 0.0
+            },
+            {
+                "id": 2,
+                "item": {
+                    "id": 1,
+                    "name": "margherita pizza",
+                    "originalPrice": 5.99
+                },
+                "priceCharged": 2.99,
+                "discount": 0.5
+            }
+        ]
+    }
 }
 ```
 
-##### DELETE /order/item?item_id={item_id}
+##### DELETE /order/item?orderId={orderId}&itemId={itemId}
 
 ###### response
 ```json
 {
-
+    "meta": {
+        "status": "created"
+    },
+    "data": {
+      "info": "Item #1 removed from order #1."
+    }
 }
 ```
 
-##### DELETE /order?orderId={order_id}
+##### DELETE /order?orderId={orderId}
 
 ###### response
 ```json
 {
-    "info": "Order #10 deleted."
+    "meta": {
+        "status": "created"
+    },
+    "data": {
+      "info": "Order #1 deleted."
+    }
 }
 ```
 
+##### POST /bill/pay
+
+###### body
+```json
+{
+    "customerId": 1,
+    "orderId": 1,
+    "orderedId": 1,
+    "pay": 5.99
+}
+```
+
+###### response
+```json
+{
+    "meta": {
+        "status": "created"
+    },
+    "data": [
+        {
+            "id": 1,
+            "customer": "john smith",
+            "ordered": [
+                {
+                    "id": 1,
+                    "item": {
+                        "id": 1,
+                        "name": "margherita pizza",
+                        "originalPrice": 5.99
+                    },
+                    "priceCharged": 5.99,
+                    "discount": 0.0
+                }
+            ],
+            "transactions": [
+                {
+                    "id": 1,
+                    "payee": "john smith",
+                    "ordered": [
+                        {
+                          "id": 1,
+                          "name": "margherita pizza"
+                        }
+                    ],
+                    "paid": 5.99,
+                    "tip": 0.0
+                }
+            ],
+            "totalOriginalPrice": 5.99,
+            "totalDiscount": 0,
+            "totalSavings": 0,
+            "totalCharged": 5.99,
+            "totalDue": 0,
+            "totalTip": 0,
+            "totalPaid": 5.99
+        }
+    ]
+}
+```
+
+##### POST /bill/tip
+
+###### body
+```json
+{
+    "customerId": 1,
+    "orderId": 1,
+    "orderedId": 1,
+    "pay": 0.99
+}
+```
+
+###### response
+```json
+{
+    "meta": {
+        "status": "created"
+    },
+    "data": [
+        {
+            "id": 1,
+            "customer": "john smith",
+            "ordered": [
+                {
+                    "id": 1,
+                    "item": {
+                        "id": 1,
+                        "name": "margherita pizza",
+                        "originalPrice": 5.99
+                    },
+                    "priceCharged": 5.99,
+                    "discount": 0.0
+                }
+            ],
+            "transactions": [
+                {
+                    "id": 1,
+                    "payee": "john smith",
+                    "ordered": [
+                        {
+                          "id": 1,
+                          "name": "margherita pizza"
+                        }
+                    ],
+                    "paid": 5.99,
+                    "tip": 0.0
+                },
+                {
+                    "id": 2,
+                    "payee": "john smith",
+                    "ordered": [
+                        {
+                          "id": 1,
+                          "name": "margherita pizza"
+                        }
+                    ],
+                    "paid": 0.0,
+                    "tip": 0.99
+                }
+            ],
+            "totalOriginalPrice": 5.99,
+            "totalDiscount": 0,
+            "totalSavings": 0,
+            "totalCharged": 5.99,
+            "totalDue": 0,
+            "totalTip": 0.99,
+            "totalPaid": 6.98
+        }
+    ]
+}
+```
+
+##### GET /bills?orderId={orderId}&customerId={customerId}&payeeId={payeeId}
+
+###### response
+```json
+{
+    "meta": {
+        "status": "ok"
+    },
+    "data": [
+        {
+            "id": 1,
+            "customer": "john smith",
+            "ordered": [
+                {
+                    "id": 1,
+                    "item": {
+                        "id": 1,
+                        "name": "margherita pizza",
+                        "originalPrice": 5.99
+                    },
+                    "priceCharged": 5.99,
+                    "discount": 0.0
+                }
+            ],
+            "transactions": [
+                {
+                    "id": 1,
+                    "payee": "john smith",
+                    "ordered": [
+                        {
+                          "id": 1,
+                          "name": "margherita pizza"
+                        }
+                    ],
+                    "paid": 5.99,
+                    "tip": 0.0
+                },
+                {
+                    "id": 2,
+                    "payee": "john smith",
+                    "ordered": [
+                        {
+                          "id": 1,
+                          "name": "margherita pizza"
+                        }
+                    ],
+                    "paid": 0.0,
+                    "tip": 0.99
+                }
+            ],
+            "totalOriginalPrice": 5.99,
+            "totalDiscount": 0,
+            "totalSavings": 0,
+            "totalCharged": 5.99,
+            "totalDue": 0,
+            "totalTip": 0.99,
+            "totalPaid": 6.98
+        }
+    ]
+}
+```

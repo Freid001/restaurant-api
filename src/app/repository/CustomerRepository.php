@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App;
 
 
@@ -94,15 +96,15 @@ class CustomerRepository
             ':last_name'   => $lastName,
         ]);
 
-        return $this->conn->lastInsertId();
+        return (int)$this->conn->lastInsertId();
     }
 
 
     /**
-     * @param $row
+     * @param array $row
      * @return Customer|null
      */
-    private function hydrateCustomer($row): ?Customer
+    private function hydrateCustomer(array $row): ?Customer
     {
         if (!$this->helper->arrayKeysExists(
             [

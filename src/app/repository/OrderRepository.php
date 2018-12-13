@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App;
 
 
@@ -103,7 +105,7 @@ class OrderRepository
         $query = $this->conn->prepare($query);
         $query->execute([':customerId' => $customerId]);
 
-        return $this->conn->lastInsertId();
+        return (int)$this->conn->lastInsertId();
     }
 
     /**
@@ -124,7 +126,7 @@ class OrderRepository
             ':discount'     => is_null($discount) ? 0.00 : $discount
         ]);
 
-        return $this->conn->lastInsertId();
+        return (int)$this->conn->lastInsertId();
     }
 
     /**
@@ -199,7 +201,7 @@ class OrderRepository
                     $row['item_id'],
                     $row['item'],
                     $row['original_price'],
-                    $row['available']
+                    (bool)$row['available']
                 ),
                 $row['price_charged'],
                 $row['discount']

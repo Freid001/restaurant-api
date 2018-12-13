@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App;
 
 
@@ -134,14 +136,14 @@ class RestaurantRepository
             $result['id'],
             $result['item'],
             $result['price'],
-            $result['available']
+            (bool)$result['available']
         );
     }
 
     /**
      * @param string $restaurant
      * @param string $cuisine
-     * @return string
+     * @return int
      */
     public function createRestaurant(string $restaurant, string $cuisine) : int
     {
@@ -152,7 +154,7 @@ class RestaurantRepository
             ':cuisine'      => $cuisine,
         ]);
 
-        return $this->conn->lastInsertId();
+        return (int)$this->conn->lastInsertId();
     }
 
     /**
@@ -182,7 +184,7 @@ class RestaurantRepository
     }
 
     /**
-     * @param array|null $restaurants
+     * @param array $restaurants
      * @param $row
      * @return array
      */
@@ -212,7 +214,7 @@ class RestaurantRepository
                 $row['id'],
                 $row['item'],
                 $row['price'],
-                $row['available']
+                (bool)$row['available']
             )
         );
 

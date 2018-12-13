@@ -19,7 +19,7 @@ RUN apt-get update && \
     php7.1-common \
     php7.1-json \
     php7.1-opcache \
-    php7.1-mysql \
+    php7.1-mysqlnd \
     php7.1-mbstring \
     php7.1-gd \
     php7.1-imap \

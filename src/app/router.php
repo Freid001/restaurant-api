@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App;
 
 use Restaurant\Bill;
@@ -65,11 +67,16 @@ class Router
         $this->conn();
     }
 
+    /**
+     * @return void
+     */
     public function conn(): void
     {
         try {
             $dsn = "mysql:host=" . getenv('DB_HOST') . "; dbname=" . getenv('DB_DATABASE') . ";";
-            $this->pdo = new \pdo($dsn, getenv('DB_USER'), getenv('DB_PASSWORD'));
+            $this->pdo = new \PDO($dsn, getenv('DB_USER'), getenv('DB_PASSWORD'));
+            $this->pdo->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
+            $this->pdo->setAttribute(\PDO::ATTR_STRINGIFY_FETCHES, false);
             $this->dbStatus = true;
         }catch (\Exception $e) {
             $this->dbStatus = false;
@@ -149,8 +156,8 @@ class Router
                     }
 
                     return $restaurant->restaurants(
-                        (int)$this->getParameter("restaurant"),
-                        (int)$this->getParameter("item"),
+                        $this->getParameter("restaurant"),
+                        $this->getParameter("item"),
                         $available
                     );
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App;
 
 
@@ -36,17 +38,6 @@ class TransactionRepository
         $this->conn = $conn;
         $this->helper = $helper;
     }
-
-    /**
-     * @param $orderId
-     * @return Transaction|null
-     */
-//    public function fetch($orderId): ?Transaction
-//    {
-//        $result = $this->fetchAll($orderId,  null);
-//
-//        return isset($result[0]) ? $result[0] : null;
-//    }
 
     /**
      * @param int|null $orderId
@@ -116,7 +107,7 @@ class TransactionRepository
             ':paid'         => $paid
         ]);
 
-        return $this->conn->lastInsertId();
+        return (int)$this->conn->lastInsertId();
     }
 
     /**
@@ -156,7 +147,7 @@ class TransactionRepository
                 $row['item_id'],
                 $row['item'],
                 $row['original_price'],
-                $row['available']
+                (bool)$row['available']
             ),
             $row['price_charged'],
             $row['discount']
@@ -170,7 +161,7 @@ class TransactionRepository
                 $row['payee_last_name']
             ),
             $order,
-            $row['tip'],
+            (bool)$row['tip'],
             $row['paid']
         );
     }
