@@ -5,7 +5,6 @@ Simple api which allows customers to split their bill, see [SLO](SLO.md)
 
 ### Requirements
 * [Docker](https://www.docker.com/)
-* [Gradle](https://gradle.org/)
 * [PHPUnit](https://phpunit.de/getting-started/phpunit-7.html)
 * [Behat](http://behat.org/en/latest/)
 
