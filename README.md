@@ -12,19 +12,19 @@ Simple api which allows customers to split their bill, see [SLO](SLO.md)
 ### Installation
 ```bash
 // build and run the app
-gradle build run
+./gradlew build run
 
 // stop the app
-gradle stop
+./gradlew stop
 
 // migrate database
-gradle flywayMigrate -i 
+./gradlew flywayMigrate -i 
 
 // run unit tests
-gradle unitTest
+./gradlew unitTest
 
 // run component tests
-gradle componentTest
+./gradlew componentTest
 ```
 
 ## Usage
